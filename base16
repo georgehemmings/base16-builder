@@ -88,10 +88,10 @@ class Theme
       }
     end
 
-    @terminal_colors = map_terminal_colors_to(@base)
+    @terminal_colors = terminal_colors_map
   end
   
-  def map_terminal_colors_to(base)
+  def terminal_colors_map
     {
       :black          => @base["00"],
       :blue           => @base["0D"],
