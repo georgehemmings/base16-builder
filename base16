@@ -15,6 +15,7 @@ class Theme
     @scheme_dir = File.join(BASE_PATH, "schemes")
     @template_dir = File.join(BASE_PATH, "templates")
     @output_dir = File.join(BASE_PATH, "output")
+    @style_dir = File.join(BASE_PATH, "styles")
   end
 
   def build(scheme_file)
@@ -38,8 +39,12 @@ class Theme
   def build_single_scheme(scheme_file)
     puts scheme_file
     scheme_data = read_scheme_file(scheme_file)
-    populate_template_variables(scheme_data)
-    create_output_files
+    style_files = read_style_dir
+    style_files.each do |style_file|
+      style_data = read_style_file(style_file)
+      populate_template_variables(scheme_data, style_data)
+      create_output_files
+    end
   end
 
   def read_scheme_file(scheme_file)
@@ -65,9 +70,22 @@ class Theme
   rescue StandardError
     abort(read_error_message(template_file))
   end
+
+  def read_style_dir
+    Dir.glob(File.join(@style_dir, '**', '*.yml'))
+  rescue StandardError
+    abort(read_error_message(@style_dir))
+  end
+
+  def read_style_file(style_file)
+    YAML.load_file(style_file)
+  rescue StandardError
+    abort(read_error_message(style_file))
+  end
   
-  def populate_template_variables(scheme_data)
+  def populate_template_variables(scheme_data, style_data)
     # Define ERB vars
+    @style = style_data["style"]
     @scheme = scheme_data["scheme"]
     @author = scheme_data["author"]
     @slug = slug(scheme_data["scheme"])
@@ -88,28 +106,14 @@ class Theme
       }
     end
 
-    @terminal_colors = terminal_colors_map
+    @terminal_colors = terminal_colors_map(style_data)
   end
-  
-  def terminal_colors_map
-    {
-      :black          => @base["00"],
-      :blue           => @base["0D"],
-      :green          => @base["0B"],
-      :cyan           => @base["0C"],
-      :red            => @base["08"],
-      :magenta        => @base["0E"],
-      :yellow         => @base["0A"],
-      :white          => @base["05"],
-      :bright_black   => @base["03"],
-      :bright_blue    => @base["04"],
-      :bright_green   => @base["01"],
-      :bright_cyan    => @base["0F"],
-      :bright_red     => @base["09"],
-      :bright_magenta => @base["06"],
-      :bright_yellow  => @base["02"],
-      :bright_white   => @base["07"]
-    }
+
+  def terminal_colors_map(style_data)
+    style_data["terminal_colors"].inject({}) do |memo, (name, base)|
+      memo[name.to_sym] = @base[base]
+      memo
+    end
   end
 
   def create_output_files
@@ -138,6 +142,7 @@ class Theme
     dir_name = File.basename(File.dirname(template_file))
     file_name = File.basename(template_file, ".erb")
     scheme_name = slug(@scheme)
+    style_name = slug(@style)
 
     output_dir = File.join(@output_dir, dir_name)
     make_dir(output_dir)
@@ -146,7 +151,7 @@ class Theme
     delimiter = file_name.starts_with?("-") ? "" : "."
 
     output_filename = File.join(output_dir,
-                                "base16-#{scheme_name}#{delimiter}#{file_name}")
+                                "base16-#{scheme_name}.#{style_name}#{delimiter}#{file_name}")
     output_file = File.open(output_filename, "w")
     output_file.write(contents)
     output_file.close

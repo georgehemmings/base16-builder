@@ -1,0 +1,20 @@
+style: "Light"
+
+terminal_colors:
+  black          : "00"
+  blue           : "0D"
+  green          : "0B"
+  cyan           : "0C"
+  red            : "08"
+  magenta        : "0E"
+  yellow         : "0A"
+  white          : "05"
+  bright_black   : "03"
+  bright_blue    : "04"
+  bright_green   : "01"
+  bright_cyan    : "0F"
+  bright_red     : "09"
+  bright_magenta : "06"
+  bright_yellow  : "02"
+  bright_white   : "07"
+
