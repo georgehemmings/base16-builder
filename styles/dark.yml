@@ -18,3 +18,8 @@ terminal_colors:
   bright_yellow  : "02"
   bright_white   : "07"
 
+elements:
+  default:
+    fg: "05"
+    bg: "00"
+

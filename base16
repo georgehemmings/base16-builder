@@ -106,7 +106,15 @@ class Theme
       }
     end
 
+    @elements = elements_map(style_data)
     @terminal_colors = terminal_colors_map(style_data)
+  end
+
+  def elements_map(style_data)
+    style_data["elements"].each do |name, style|
+      style["fg"] = @base[style.fetch("fg") { "05" }]
+      style["bg"] = @base[style.fetch("bg") { "00" }]
+    end
   end
 
   def terminal_colors_map(style_data)
